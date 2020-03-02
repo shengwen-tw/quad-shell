@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <string.h>
 #include "shell.h"
 
@@ -19,6 +20,11 @@ static void split_shell_cmd_token(char *cmd, char param_list[PARAM_LIST_SIZE_MAX
 	}
 }
 
+void unknown_cmd_handler(char param_list[PARAM_LIST_SIZE_MAX][PARAM_LEN_MAX])
+{
+	printf("unknown command: %s\n\r", param_list[0]);
+}
+
 void shell_cmd_exec(char *cmd, struct cmd_list_entry *cmd_list, int list_size)
 {
 	char param_list[PARAM_LIST_SIZE_MAX][PARAM_LEN_MAX] = {0};
@@ -31,4 +37,6 @@ void shell_cmd_exec(char *cmd, struct cmd_list_entry *cmd_list, int list_size)
 			return;
 		}
 	}
+
+	unknown_cmd_handler(param_list);
 }
