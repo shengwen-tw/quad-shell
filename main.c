@@ -36,6 +36,7 @@ enum {
 struct shell_struct {
 	int cursor_pos;
 	int char_cnt;
+	char *buf;
 };
 
 char shell_getc(void)
@@ -48,13 +49,42 @@ void shell_cls(void)
 	printf("\x1b[H\x1b[2J");
 }
 
+void shell_struct_init(struct shell_struct *_shell, char *ret_cmd)
+{
+	_shell->cursor_pos = 0;
+	_shell->char_cnt = 0;
+	_shell->buf = ret_cmd;
+	memset(_shell->buf, '\0', CMD_LEN_MAX);
+}
+
 void shell_reset_struct(struct shell_struct *_shell)
 {
 	_shell->cursor_pos = 0;
 	_shell->char_cnt = 0;	
 }
 
-void shell(char *username, struct shell_struct *_shell, char *ret_cmd)
+void shell_remove_char(struct shell_struct *_shell)
+{
+	if(_shell->char_cnt == 0 || _shell->cursor_pos == 0) return;
+
+	int i;
+	for(i = (_shell->cursor_pos - 1); i < (_shell->char_cnt - 1); i++) {
+		_shell->buf[i] = _shell->buf[i + 1];
+	}
+
+	_shell->buf[_shell->char_cnt - 1] = '\0';
+	_shell->char_cnt--;
+
+	if(_shell->cursor_pos > _shell->char_cnt) {
+		_shell->cursor_pos = _shell->char_cnt;
+	}
+}
+
+void shell_insert_char(struct shell_struct *_shell)
+{
+}
+
+void shell(char *username, struct shell_struct *_shell)
 {
 	char prompt[PROMPT_LEN_MAX] = {0};
 	printf("%s > ", username);
@@ -72,6 +102,7 @@ void shell(char *username, struct shell_struct *_shell, char *ret_cmd)
 			printf("\r\033[%dC", prompt_len);
 			break;
 		case CTRL_C:
+			printf("^C\n\r");
 			system("/bin/stty cooked echo");
 			exit(0);
 			break;
@@ -128,10 +159,15 @@ void shell(char *username, struct shell_struct *_shell, char *ret_cmd)
 		case ARROW_PREFIX:
 			break;
 		case BACKSPACE:
+			shell_remove_char(_shell);
+			printf("\33[2K");
+			printf("\r");
+			printf("%s > %s", username, _shell->buf);
 			break;
 		default:
 			if(_shell->char_cnt <= (CMD_LEN_MAX - 1)) {
-				ret_cmd[_shell->char_cnt] = c;
+				_shell->buf[_shell->char_cnt] = c;
+				_shell->buf[_shell->char_cnt + 1] = '\0';
 				_shell->char_cnt++;
 				_shell->cursor_pos++;
 				printf("%c", c);
@@ -146,12 +182,12 @@ int main(void)
 	system ("/bin/stty raw -echo");
 
 	char user_cmd[CMD_LEN_MAX];
-
 	struct shell_struct _shell_struct;
-	shell_reset_struct(&_shell_struct);
+	shell_struct_init(&_shell_struct, user_cmd);
 
+	shell_cls();
 	while(1) {
-		shell("shell", &_shell_struct, user_cmd);
+		shell("shell", &_shell_struct);
 
 		printf("received command [%s] from shell.\n\r", user_cmd);
 	}
