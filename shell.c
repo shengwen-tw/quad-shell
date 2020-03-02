@@ -65,7 +65,7 @@ static void shell_refresh_line(struct shell_struct *_shell)
                _shell->prompt_msg, _shell->buf, _shell->prompt_len + _shell->cursor_pos);
 }
 
-void shell(char *username, struct shell_struct *_shell)
+void shell_cli(char *username, struct shell_struct *_shell)
 {
 	sprintf(_shell->prompt_msg, "%s > ", username);
 	_shell->prompt_len = strlen(_shell->prompt_msg);

@@ -4,6 +4,9 @@
 #define CMD_LEN_MAX 50
 #define PROMPT_LEN_MAX 50
 
+#define PARAM_LIST_SIZE_MAX 10
+#define PARAM_LEN_MAX 10
+
 enum {
 	NULL_CH = 0,       /* null character */
 	CTRL_A = 1,        /* ctrl + a*/
@@ -39,8 +42,14 @@ struct shell_struct {
 	char prompt_msg[PROMPT_LEN_MAX];
 };
 
+struct cmd_list_entry {
+	void (*handler)(char param_list[PARAM_LIST_SIZE_MAX][PARAM_LEN_MAX]);
+	char name[PROMPT_LEN_MAX];
+};
+
 void shell_init_struct(struct shell_struct *_shell, char *ret_cmd);
 void shell_cls(void);
-void shell(char *username, struct shell_struct *_shell);
+void shell_cli(char *username, struct shell_struct *_shell);
+void shell_cmd_exec(char *cmd, struct cmd_list_entry *cmd_list, int list_size);
 
 #endif
