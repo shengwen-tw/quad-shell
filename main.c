@@ -68,12 +68,13 @@ void shell_remove_char(struct shell_struct *_shell)
 	if(_shell->char_cnt == 0 || _shell->cursor_pos == 0) return;
 
 	int i;
-	for(i = (_shell->cursor_pos - 1); i < (_shell->char_cnt - 1); i++) {
+	for(i = (_shell->cursor_pos - 1); i < (_shell->char_cnt); i++) {
 		_shell->buf[i] = _shell->buf[i + 1];
 	}
 
-	_shell->buf[_shell->char_cnt - 1] = '\0';
+	_shell->buf[_shell->char_cnt] = '\0';
 	_shell->char_cnt--;
+	_shell->cursor_pos--;
 
 	if(_shell->cursor_pos > _shell->char_cnt) {
 		_shell->cursor_pos = _shell->char_cnt;
@@ -87,8 +88,9 @@ void shell_insert_char(struct shell_struct *_shell)
 void shell(char *username, struct shell_struct *_shell)
 {
 	char prompt[PROMPT_LEN_MAX] = {0};
-	printf("%s > ", username);
+	sprintf(prompt, "%s > ", username);
 	int prompt_len = strlen(prompt);
+	printf("%s", prompt);
 
 	int c;
 	char seq[2];
@@ -160,9 +162,9 @@ void shell(char *username, struct shell_struct *_shell)
 			break;
 		case BACKSPACE:
 			shell_remove_char(_shell);
-			printf("\33[2K");
-			printf("\r");
-			printf("%s > %s", username, _shell->buf);
+			printf("\33[2K\r");
+			printf("%s > %s\r", username, _shell->buf);
+			printf("\033[%dC", prompt_len + _shell->cursor_pos);
 			break;
 		default:
 			if(_shell->char_cnt <= (CMD_LEN_MAX - 1)) {
