@@ -176,14 +176,11 @@ void shell(char *username, struct shell_struct *_shell)
 				}
 			}				
 			break;
-		case SPACE:
-			break;
-		case ARROW_PREFIX:
-			break;
 		case BACKSPACE:
 			shell_remove_char(_shell);
 			shell_refresh_line(_shell);
 			break;
+		case SPACE:
 		default:
 			shell_insert_char(_shell, c);
 			shell_refresh_line(_shell);
