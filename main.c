@@ -62,7 +62,8 @@ void shell_struct_init(struct shell_struct *_shell, char *ret_cmd)
 void shell_reset_struct(struct shell_struct *_shell)
 {
 	_shell->cursor_pos = 0;
-	_shell->char_cnt = 0;	
+	_shell->char_cnt = 0;
+	_shell->buf[0] = '\0';
 }
 
 void shell_remove_char(struct shell_struct *_shell)
