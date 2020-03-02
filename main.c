@@ -6,8 +6,6 @@
 #define CMD_LEN_MAX 50
 #define PROMPT_LEN_MAX 50
 
-int buf_curr = 0;
-
 enum {
 	NULL_CH = 0,       /* null character */
 	CTRL_A = 1,        /* ctrl + a*/
@@ -35,6 +33,11 @@ enum {
 	BACKSPACE = 127,   /* backspace */
 } KEYS;
 
+struct shell_struct {
+	int cursor_pos;
+	int char_cnt;
+};
+
 char shell_getc(void)
 {
 	return getchar();
@@ -45,10 +48,17 @@ void shell_cls(void)
 	printf("\x1b[H\x1b[2J");
 }
 
-void shell(char *username, char *ret_cmd)
+void shell_reset_struct(struct shell_struct *_shell)
+{
+	_shell->cursor_pos = 0;
+	_shell->char_cnt = 0;	
+}
+
+void shell(char *username, struct shell_struct *_shell, char *ret_cmd)
 {
 	char prompt[PROMPT_LEN_MAX] = {0};
 	printf("%s > ", username);
+	int prompt_len = strlen(prompt);
 
 	int c;
 	char seq[2];
@@ -59,6 +69,7 @@ void shell(char *username, char *ret_cmd)
 		case NULL_CH:
 			break;
 		case CTRL_A:
+			printf("\r\033[%dC", prompt_len);
 			break;
 		case CTRL_C:
 			system("/bin/stty cooked echo");
@@ -76,8 +87,7 @@ void shell(char *username, char *ret_cmd)
 			break;
 		case ENTER:
 			printf("\n\r");
-			ret_cmd[buf_curr] = 0;
-			buf_curr = 0;
+			shell_reset_struct(_shell);
 			return;
 			break;
 		case CTRL_K:
@@ -101,28 +111,29 @@ void shell(char *username, char *ret_cmd)
 				if(seq[1] == UP_ARROW) {
 				} else if(seq[1] == DOWN_ARROW) {
 				} else if(seq[1] == RIGHT_ARROW) {
+					if(_shell->cursor_pos < _shell->char_cnt) {
+						_shell->cursor_pos++;
+						printf("\033[1C");
+					}
 				} else if(seq[1] == LEFT_ARROW) {
+					if(_shell->cursor_pos > 0) {
+						printf("\033[1D");
+						_shell->cursor_pos--;
+					}
 				}
 			}				
 			break;
 		case SPACE:
-			break;
-		case UP_ARROW:
-			break;
-		case DOWN_ARROW:
-			break;
-		case RIGHT_ARROW:
-			break;
-		case LEFT_ARROW:
 			break;
 		case ARROW_PREFIX:
 			break;
 		case BACKSPACE:
 			break;
 		default:
-			if(buf_curr <= (CMD_LEN_MAX - 1)) {
-				ret_cmd[buf_curr] = c;
-				buf_curr++;
+			if(_shell->char_cnt <= (CMD_LEN_MAX - 1)) {
+				ret_cmd[_shell->char_cnt] = c;
+				_shell->char_cnt++;
+				_shell->cursor_pos++;
 				printf("%c", c);
 			}
 			break;
@@ -136,8 +147,11 @@ int main(void)
 
 	char user_cmd[CMD_LEN_MAX];
 
+	struct shell_struct _shell_struct;
+	shell_reset_struct(&_shell_struct);
+
 	while(1) {
-		shell("shell", user_cmd);
+		shell("shell", &_shell_struct, user_cmd);
 
 		printf("received command [%s] from shell.\n\r", user_cmd);
 	}
