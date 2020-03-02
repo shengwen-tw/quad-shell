@@ -83,8 +83,19 @@ void shell_remove_char(struct shell_struct *_shell)
 	}
 }
 
-void shell_insert_char(struct shell_struct *_shell)
+void shell_insert_char(struct shell_struct *_shell, char c)
 {
+	if(_shell->char_cnt == (CMD_LEN_MAX - 1)) return;
+
+	int i;
+	for(i = _shell->char_cnt; i > (_shell->cursor_pos - 1); i--) {
+		_shell->buf[i] = _shell->buf[i - 1];
+	}
+	_shell->char_cnt++;
+	_shell->buf[_shell->char_cnt] = '\0';
+
+	_shell->buf[_shell->cursor_pos] = c;
+	_shell->cursor_pos++;
 }
 
 void shell_refresh_line(struct shell_struct *_shell)
@@ -174,14 +185,8 @@ void shell(char *username, struct shell_struct *_shell)
 			shell_refresh_line(_shell);
 			break;
 		default:
-			shell_insert_char(_shell);
-			if(_shell->char_cnt <= (CMD_LEN_MAX - 1)) {
-				_shell->buf[_shell->char_cnt] = c;
-				_shell->buf[_shell->char_cnt + 1] = '\0';
-				_shell->char_cnt++;
-				_shell->cursor_pos++;
-				printf("%c", c);
-			}
+			shell_insert_char(_shell, c);
+			shell_refresh_line(_shell);
 			break;
 		}
 	}
