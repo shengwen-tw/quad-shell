@@ -3,6 +3,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define CMD_LEN_MAX 50
+#define PROMPT_LEN_MAX 50
+
+int buf_curr = 0;
+
 enum {
 	NULL_CH = 0,       /* null character */
 	CTRL_A = 1,        /* ctrl + a*/
@@ -30,27 +35,33 @@ enum {
 	BACKSPACE = 127,   /* backspace */
 } KEYS;
 
-char shell_getc()
+char shell_getc(void)
 {
 	return getchar();
 }
 
-int main(void)
+void shell_cls(void)
 {
-	system ("/bin/stty raw -echo");
+	printf("\x1b[H\x1b[2J");
+}
+
+void shell(char *username, char *ret_cmd)
+{
+	char prompt[PROMPT_LEN_MAX] = {0};
+	printf("%s > ", username);
+
 	int c;
 	char seq[2];
 	while(1) {
-		c = getchar();
+		c = shell_getc();
 
 		switch(c) {
 		case NULL_CH:
 			break;
 		case CTRL_A:
-			printf("<ctrl+a>\n\r");
 			break;
 		case CTRL_C:
-			system ("/bin/stty cooked echo");
+			system("/bin/stty cooked echo");
 			exit(0);
 			break;
 		case CTRL_D:
@@ -64,7 +75,10 @@ int main(void)
 		case TAB:
 			break;
 		case ENTER:
-			printf("enter\n\r");
+			printf("\n\r");
+			ret_cmd[buf_curr] = 0;
+			buf_curr = 0;
+			return;
 			break;
 		case CTRL_K:
 			break;
@@ -81,17 +95,13 @@ int main(void)
 		case CTRL_W:
 			break;
 		case ESCAPE_SEQ:
-			seq[0] = getchar();
-			seq[1] = getchar();
+			seq[0] = shell_getc();
+			seq[1] = shell_getc();
 			if(seq[0] == ARROW_PREFIX) {
 				if(seq[1] == UP_ARROW) {
-					printf("up arrow\n\r");
 				} else if(seq[1] == DOWN_ARROW) {
-					printf("down arrow\n\r");
 				} else if(seq[1] == RIGHT_ARROW) {
-					printf("right arrow\n\r");
 				} else if(seq[1] == LEFT_ARROW) {
-					printf("left arrow\n\r");
 				}
 			}				
 			break;
@@ -110,8 +120,27 @@ int main(void)
 		case BACKSPACE:
 			break;
 		default:
+			if(buf_curr <= (CMD_LEN_MAX - 1)) {
+				ret_cmd[buf_curr] = c;
+				buf_curr++;
+				printf("%c", c);
+			}
 			break;
 		}
 	}
+}
+
+int main(void)
+{
+	system ("/bin/stty raw -echo");
+
+	char user_cmd[CMD_LEN_MAX];
+
+	while(1) {
+		shell("shell", user_cmd);
+
+		printf("received command [%s] from shell.\n\r", user_cmd);
+	}
+
 	return 0;
 }
