@@ -4,11 +4,13 @@
 #include <string.h>
 #include "shell.h"
 
+/* port your own getc function here */
 static char shell_getc(void)
 {
 	return getchar();
 }
 
+/* port your own puts function here */
 static void shell_puts(char *s)
 {
 	int len = strlen(s);
@@ -17,6 +19,20 @@ static void shell_puts(char *s)
 	for(i = 0; i < len; i++) {
 		putchar(s[i]);
 	}
+}
+
+/* define your own ctrl+c behavior here */
+static void shell_ctrl_c_handler(void)
+{
+	shell_puts("^C\n\r");
+	system("/bin/stty cooked echo");
+	exit(0);
+}
+
+/* define your own unknown shell command behavior here */
+static void shell_unknown_cmd_handler(char param_list[PARAM_LIST_SIZE_MAX][PARAM_LEN_MAX])
+{
+	printf("unknown command: %s\n\r", param_list[0]);
 }
 
 void shell_cls(void)
@@ -75,8 +91,8 @@ static void shell_refresh_line(struct shell_struct *shell)
 {
 	char s[PROMPT_LEN_MAX * 2];
 	sprintf(s, "\33[2K\r"   /* clear current line */
-                "%s%s\r"     /* show prompt */
-                "\033[%dC",  /* move cursor */
+                "%s%s\r"        /* show prompt */
+                "\033[%dC",     /* move cursor */
                 shell->prompt_msg, shell->buf, shell->prompt_len + shell->cursor_pos);
 	shell_puts(s);
 }
@@ -100,9 +116,7 @@ void shell_cli(struct shell_struct *shell)
 			shell_refresh_line(shell);
 			break;
 		case CTRL_C:
-			shell_puts("^C\n\r");
-			system("/bin/stty cooked echo");
-			exit(0);
+			shell_ctrl_c_handler();
 			return;
 			break;
 		case CTRL_D:
@@ -211,11 +225,6 @@ void shell_cli(struct shell_struct *shell)
 	}
 }
 
-void unknown_cmd_handler(char param_list[PARAM_LIST_SIZE_MAX][PARAM_LEN_MAX])
-{
-	printf("unknown command: %s\n\r", param_list[0]);
-}
-
 static void shell_split_cmd_token(char *cmd, char param_list[PARAM_LIST_SIZE_MAX][PARAM_LEN_MAX])
 {
 	int param_list_index = 0;
@@ -248,6 +257,6 @@ void shell_cmd_exec(char *cmd, struct cmd_list_entry *cmd_list, int list_size)
 		}
 	}
 
-	unknown_cmd_handler(param_list);
+	shell_unknown_cmd_handler(param_list);
 	cmd[0] = '\0';
 }
