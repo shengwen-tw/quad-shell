@@ -39,7 +39,7 @@ struct shell_struct {
 	int char_cnt;
 	int prompt_len;
 	char *buf;
-	char prompt_msg[PROMPT_LEN_MAX];
+	char *prompt_msg;
 };
 
 struct cmd_list_entry {
@@ -47,9 +47,9 @@ struct cmd_list_entry {
 	char name[PROMPT_LEN_MAX];
 };
 
-void shell_init_struct(struct shell_struct *_shell, char *ret_cmd);
+void shell_init_struct(struct shell_struct *_shell, char *prompt_msg, char *ret_cmd);
 void shell_cls(void);
-void shell_cli(char *username, struct shell_struct *_shell);
+void shell_cli(struct shell_struct *_shell);
 void shell_cmd_exec(char *cmd, struct cmd_list_entry *cmd_list, int list_size);
 
 #endif

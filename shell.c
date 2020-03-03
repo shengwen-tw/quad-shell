@@ -9,67 +9,82 @@ static char shell_getc(void)
 	return getchar();
 }
 
+static void shell_puts(char *s)
+{
+	int len = strlen(s);
+
+	int i;
+	for(i = 0; i < len; i++) {
+		putchar(s[i]);
+	}
+}
+
 void shell_cls(void)
 {
-	printf("\x1b[H\x1b[2J");
+	shell_puts("\x1b[H\x1b[2J");
 }
 
-void shell_init_struct(struct shell_struct *_shell, char *ret_cmd)
+void shell_init_struct(struct shell_struct *shell, char *prompt_msg, char *ret_cmd)
 {
-	_shell->cursor_pos = 0;
-	_shell->char_cnt = 0;
-	_shell->buf = ret_cmd;
-	memset(_shell->buf, '\0', CMD_LEN_MAX);
+	shell->prompt_msg = prompt_msg;
+	shell->prompt_len = strlen(shell->prompt_msg);
+
+	shell->cursor_pos = 0;
+	shell->char_cnt = 0;
+	shell->buf = ret_cmd;
+	memset(shell->buf, '\0', CMD_LEN_MAX);
 }
 
-static void shell_reset_struct(struct shell_struct *_shell)
+static void shell_reset_struct(struct shell_struct *shell)
 {
-	_shell->cursor_pos = 0;
-	_shell->char_cnt = 0;
+	shell->cursor_pos = 0;
+	shell->char_cnt = 0;
 }
 
-static void shell_remove_char(struct shell_struct *_shell)
-{
-	int i;
-	for(i = (_shell->cursor_pos - 1); i < (_shell->char_cnt); i++) {
-		_shell->buf[i] = _shell->buf[i + 1];
-	}
-
-	_shell->buf[_shell->char_cnt] = '\0';
-	_shell->char_cnt--;
-	_shell->cursor_pos--;
-
-	if(_shell->cursor_pos > _shell->char_cnt) {
-		_shell->cursor_pos = _shell->char_cnt;
-	}
-}
-
-static void shell_insert_char(struct shell_struct *_shell, char c)
+static void shell_remove_char(struct shell_struct *shell)
 {
 	int i;
-	for(i = _shell->char_cnt; i > (_shell->cursor_pos - 1); i--) {
-		_shell->buf[i] = _shell->buf[i - 1];
+	for(i = (shell->cursor_pos - 1); i < (shell->char_cnt); i++) {
+		shell->buf[i] = shell->buf[i + 1];
 	}
-	_shell->char_cnt++;
-	_shell->buf[_shell->char_cnt] = '\0';
 
-	_shell->buf[_shell->cursor_pos] = c;
-	_shell->cursor_pos++;
+	shell->buf[shell->char_cnt] = '\0';
+	shell->char_cnt--;
+	shell->cursor_pos--;
+
+	if(shell->cursor_pos > shell->char_cnt) {
+		shell->cursor_pos = shell->char_cnt;
+	}
 }
 
-static void shell_refresh_line(struct shell_struct *_shell)
+static void shell_insert_char(struct shell_struct *shell, char c)
 {
-	printf("\33[2K\r"   /* clear current line */
-               "%s%s\r"     /* show prompt */
-               "\033[%dC",  /* move cursor */
-               _shell->prompt_msg, _shell->buf, _shell->prompt_len + _shell->cursor_pos);
+	int i;
+	for(i = shell->char_cnt; i > (shell->cursor_pos - 1); i--) {
+		shell->buf[i] = shell->buf[i - 1];
+	}
+	shell->char_cnt++;
+	shell->buf[shell->char_cnt] = '\0';
+
+	shell->buf[shell->cursor_pos] = c;
+	shell->cursor_pos++;
 }
 
-void shell_cli(char *username, struct shell_struct *_shell)
+static void shell_refresh_line(struct shell_struct *shell)
 {
-	sprintf(_shell->prompt_msg, "%s > ", username);
-	_shell->prompt_len = strlen(_shell->prompt_msg);
-	printf("%s", _shell->prompt_msg);
+	char s[PROMPT_LEN_MAX * 2];
+	sprintf(s, "\33[2K\r"   /* clear current line */
+                "%s%s\r"     /* show prompt */
+                "\033[%dC",  /* move cursor */
+                shell->prompt_msg, shell->buf, shell->prompt_len + shell->cursor_pos);
+	shell_puts(s);
+}
+
+void shell_cli(struct shell_struct *shell)
+{
+	shell_puts(shell->prompt_msg);
+
+	char s[PROMPT_LEN_MAX];
 
 	int c;
 	char seq[2];
@@ -80,12 +95,14 @@ void shell_cli(char *username, struct shell_struct *_shell)
 		case NULL_CH:
 			break;
 		case CTRL_A:
-			printf("\r\033[%dC", _shell->prompt_len);
+			sprintf(s, "\r\033[%dC", shell->prompt_len);
+			shell_puts(s);
 			break;
 		case CTRL_C:
-			printf("^C\n\r");
+			shell_puts("^C\n\r");
 			system("/bin/stty cooked echo");
 			exit(0);
+			return;
 			break;
 		case CTRL_D:
 			break;
@@ -98,8 +115,8 @@ void shell_cli(char *username, struct shell_struct *_shell)
 		case TAB:
 			break;
 		case ENTER:
-			printf("\n\r");
-			shell_reset_struct(_shell);
+			shell_puts("\n\r");
+			shell_reset_struct(shell);
 			return;
 			break;
 		case CTRL_K:
@@ -123,29 +140,29 @@ void shell_cli(char *username, struct shell_struct *_shell)
 				if(seq[1] == UP_ARROW) {
 				} else if(seq[1] == DOWN_ARROW) {
 				} else if(seq[1] == RIGHT_ARROW) {
-					if(_shell->cursor_pos < _shell->char_cnt) {
-						_shell->cursor_pos++;
-						printf("\033[1C");
+					if(shell->cursor_pos < shell->char_cnt) {
+						shell->cursor_pos++;
+						shell_puts("\033[1C");
 					}
 				} else if(seq[1] == LEFT_ARROW) {
-					if(_shell->cursor_pos > 0) {
-						printf("\033[1D");
-						_shell->cursor_pos--;
+					if(shell->cursor_pos > 0) {
+						shell_puts("\033[1D");
+						shell->cursor_pos--;
 					}
 				}
 			}				
 			break;
 		case BACKSPACE:
-			if(_shell->char_cnt != 0 && _shell->cursor_pos != 0) {
-				shell_remove_char(_shell);
-				shell_refresh_line(_shell);
+			if(shell->char_cnt != 0 && shell->cursor_pos != 0) {
+				shell_remove_char(shell);
+				shell_refresh_line(shell);
 			}
 			break;
 		case SPACE:
 		default:
-			if(_shell->char_cnt != (CMD_LEN_MAX - 1)) {
-				shell_insert_char(_shell, c);
-				shell_refresh_line(_shell);
+			if(shell->char_cnt != (CMD_LEN_MAX - 1)) {
+				shell_insert_char(shell, c);
+				shell_refresh_line(shell);
 			}
 			break;
 		}
