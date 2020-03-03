@@ -231,11 +231,14 @@ static void shell_split_cmd_token(char *cmd, char param_list[PARAM_LIST_SIZE_MAX
 	int param_list_index = 0;
 	int i = 0, j = 0;
 
-	while(i < strlen(cmd) && cmd[i] == ' ') {
+	int cmd_s_len = strlen(cmd);
+
+	/* skip spaces before first parameter */
+	while(i < cmd_s_len && cmd[i] == ' ') {
 		i++;
 	}
 
-	for(i; i < strlen(cmd); i++) {
+	for(i; i < cmd_s_len; i++) {
 		if(cmd[i] == ' ') {
 			param_list[param_list_index][j] = '\0';
 			param_list_index++;
@@ -247,7 +250,8 @@ static void shell_split_cmd_token(char *cmd, char param_list[PARAM_LIST_SIZE_MAX
 				return;
 			}
 
-			while(cmd[i + 1] == ' ' && i < strlen(cmd)) {
+			/* skip spaces */
+			while(cmd[i + 1] == ' ' && i < cmd_s_len) {
 				i++;
 			}
 		} else {
