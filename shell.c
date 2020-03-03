@@ -102,8 +102,6 @@ void shell_cli(struct shell_struct *shell)
 {
 	shell_puts(shell->prompt_msg);
 
-	char s[PROMPT_LEN_MAX];
-
 	int c;
 	char seq[2];
 	while(1) {
@@ -200,7 +198,7 @@ void shell_cli(struct shell_struct *shell)
 						shell->cursor_pos = shell->char_cnt;
 						shell_refresh_line(shell);
 					}
-				} else if(seq[1] = DELETE && shell_getc() == ESC_SEQ4) {
+				} else if(seq[1] == DELETE && shell_getc() == ESC_SEQ4) {
 					if(shell->char_cnt != 0 && shell->cursor_pos != shell->char_cnt) {
 						shell_remove_char(shell, shell->cursor_pos + 1);
 						shell->cursor_pos++;
@@ -238,7 +236,7 @@ static void shell_split_cmd_token(char *cmd, char param_list[PARAM_LIST_SIZE_MAX
 		i++;
 	}
 
-	for(i; i < cmd_s_len; i++) {
+	for(; i < cmd_s_len; i++) {
 		if(cmd[i] == ' ') {
 			param_list[param_list_index][j] = '\0';
 			param_list_index++;
