@@ -7,6 +7,8 @@
 #define PARAM_LIST_SIZE_MAX 10
 #define PARAM_LEN_MAX 10
 
+#define SIZE_OF_SHELL_CMD_LIST(list) (sizeof(list) / sizeof(struct cmd_list_entry))
+
 enum {
 	NULL_CH = 0,       /* null character */
 	CTRL_A = 1,        /* ctrl + a*/

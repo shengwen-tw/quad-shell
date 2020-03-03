@@ -33,8 +33,8 @@ int main(void)
 	struct shell_struct shell;
 	shell_init_struct(&shell, "shell > ", ret_shell_cmd);
 
-	/*init shell parser */
-	int shell_cmd_cnt = sizeof(shell_cmd_list) / sizeof(struct cmd_list_entry);
+	/* init shell parser */
+	int shell_cmd_cnt = SIZE_OF_SHELL_CMD_LIST(shell_cmd_list);
 
 	shell_cls();
 	while(1) {
