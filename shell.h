@@ -59,7 +59,7 @@ struct shell_struct {
 };
 
 struct cmd_list_entry {
-	void (*handler)(char param_list[PARAM_LIST_SIZE_MAX][PARAM_LEN_MAX]);
+	void (*handler)(char param_list[PARAM_LIST_SIZE_MAX][PARAM_LEN_MAX], int param_cnt);
 	char name[PROMPT_LEN_MAX];
 };
 

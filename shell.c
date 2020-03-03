@@ -1,6 +1,7 @@
 #include <termios.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include "shell.h"
 
@@ -30,7 +31,7 @@ static void shell_ctrl_c_handler(void)
 }
 
 /* define your own unknown shell command behavior here */
-static void shell_unknown_cmd_handler(char param_list[PARAM_LIST_SIZE_MAX][PARAM_LEN_MAX])
+static void shell_unknown_cmd_handler(char param_list[PARAM_LIST_SIZE_MAX][PARAM_LEN_MAX], int param_cnt)
 {
 	printf("unknown command: %s\n\r", param_list[0]);
 }
@@ -225,38 +226,53 @@ void shell_cli(struct shell_struct *shell)
 	}
 }
 
-static void shell_split_cmd_token(char *cmd, char param_list[PARAM_LIST_SIZE_MAX][PARAM_LEN_MAX])
+static void shell_split_cmd_token(char *cmd, char param_list[PARAM_LIST_SIZE_MAX][PARAM_LEN_MAX], int *param_cnt)
 {
 	int param_list_index = 0;
-	int i;
-	for(i = 0; i < strlen(cmd); i++) {
+	int i = 0, j = 0;
+
+	while(i < strlen(cmd) && cmd[i] == ' ') {
+		i++;
+	}
+
+	for(i; i < strlen(cmd); i++) {
 		if(cmd[i] == ' ') {
-			i++;
+			param_list[param_list_index][j] = '\0';
 			param_list_index++;
-			while(i < strlen(cmd)) {
-				if(cmd[i] == ' ') i++;
-				else break;
+			j = 0;
+
+			/* exceed maximum parameter count  */
+			if(param_list_index == PARAM_LIST_SIZE_MAX) {
+				*param_cnt = param_list_index;
+				return;
+			}
+
+			while(cmd[i + 1] == ' ' && i < strlen(cmd)) {
+				i++;
 			}
 		} else {
-			param_list[param_list_index][i] = cmd[i];
+			param_list[param_list_index][j] = cmd[i];
+			j++;
 		}
 	}
+	*param_cnt = param_list_index + 1;
 }
 
 void shell_cmd_exec(char *cmd, struct cmd_list_entry *cmd_list, int list_size)
 {
 	char param_list[PARAM_LIST_SIZE_MAX][PARAM_LEN_MAX] = {0};
-	shell_split_cmd_token(cmd, param_list);
+	int param_cnt;
+	shell_split_cmd_token(cmd, param_list, &param_cnt);
 
 	int i;
 	for(i = 0; i < list_size; i++) {
 		if(strcmp(param_list[0], cmd_list[i].name) == 0) {
-			cmd_list[i].handler(param_list);
+			cmd_list[i].handler(param_list, param_cnt);
 			cmd[0] = '\0';
 			return;
 		}
 	}
 
-	shell_unknown_cmd_handler(param_list);
+	shell_unknown_cmd_handler(param_list, param_cnt);
 	cmd[0] = '\0';
 }

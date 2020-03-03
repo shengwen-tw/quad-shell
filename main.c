@@ -4,22 +4,30 @@
 #include <string.h>
 #include "shell.h"
 
-void shell_cmd_help(char param_list[PARAM_LIST_SIZE_MAX][PARAM_LEN_MAX]);
-void shell_cmd_echo(char param_list[PARAM_LIST_SIZE_MAX][PARAM_LEN_MAX]);
+void shell_cmd_help(char param_list[PARAM_LIST_SIZE_MAX][PARAM_LEN_MAX], int param_cnt);
+void shell_cmd_echo(char param_list[PARAM_LIST_SIZE_MAX][PARAM_LEN_MAX], int param_cnt);
 
 struct cmd_list_entry shell_cmd_list[] = {
 	DEF_SHELL_CMD(help)
 	DEF_SHELL_CMD(echo)
 };
 
-void shell_cmd_help(char param_list[PARAM_LIST_SIZE_MAX][PARAM_LEN_MAX])
+void shell_cmd_help(char param_list[PARAM_LIST_SIZE_MAX][PARAM_LEN_MAX], int param_cnt)
 {
 	printf("help\n\r");
+	int i;
+	for(i = 1; i < param_cnt; i++) {
+		printf("%s\n\r", param_list[i]);
+	}
 }
 
-void shell_cmd_echo(char param_list[PARAM_LIST_SIZE_MAX][PARAM_LEN_MAX])
+void shell_cmd_echo(char param_list[PARAM_LIST_SIZE_MAX][PARAM_LEN_MAX], int param_cnt)
 {
 	printf("echo\n\r");
+	int i;
+	for(i = 1; i < param_cnt; i++) {
+		printf("%s\n\r", param_list[i]);
+	}
 }
 
 int main(void)
