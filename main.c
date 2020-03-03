@@ -7,8 +7,6 @@
 void shell_cmd_help(char param_list[PARAM_LIST_SIZE_MAX][PARAM_LEN_MAX]);
 void shell_cmd_echo(char param_list[PARAM_LIST_SIZE_MAX][PARAM_LEN_MAX]);
 
-#define DEF_SHELL_CMD(cmd_name) {.handler = shell_cmd_ ## cmd_name, .name = #cmd_name},
-
 struct cmd_list_entry shell_cmd_list[] = {
 	DEF_SHELL_CMD(help)
 	DEF_SHELL_CMD(echo)
