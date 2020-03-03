@@ -95,8 +95,8 @@ void shell_cli(struct shell_struct *shell)
 		case NULL_CH:
 			break;
 		case CTRL_A:
-			sprintf(s, "\r\033[%dC", shell->prompt_len);
-			shell_puts(s);
+			shell->cursor_pos = 0;
+			shell_refresh_line(shell);
 			break;
 		case CTRL_C:
 			shell_puts("^C\n\r");
@@ -110,14 +110,23 @@ void shell_cli(struct shell_struct *shell)
 			break;
 		case CTRL_F:
 			break;
+		case CTRL_G:
+			break;
 		case CTRL_H:
 			break;
 		case TAB:
 			break;
+		case CTRL_J:
+			break;
 		case ENTER:
-			shell_puts("\n\r");
-			shell_reset_struct(shell);
-			return;
+			if(shell->char_cnt > 0) {
+				shell_puts("\n\r");
+				shell_reset_struct(shell);
+				return;
+			} else {
+				shell_puts("\n\r");
+				shell_puts(shell->prompt_msg);
+			}
 			break;
 		case CTRL_K:
 			break;
@@ -125,13 +134,27 @@ void shell_cli(struct shell_struct *shell)
 			break;
 		case CTRL_N:
 			break;
+		case CTRL_O:
+			break;
 		case CTRL_P:
+			break;
+		case CTRL_Q:
+			break;
+		case CTRL_R:
+			break;
+		case CTRL_S:
 			break;
 		case CTRL_T:
 			break;
 		case CTRL_U:
 			break;
 		case CTRL_W:
+			break;
+		case CTRL_X:
+			break;
+		case CTRL_Y:
+			break;
+		case CTRL_Z:
 			break;
 		case ESCAPE_SEQ:
 			seq[0] = shell_getc();
@@ -201,9 +224,11 @@ void shell_cmd_exec(char *cmd, struct cmd_list_entry *cmd_list, int list_size)
 	for(i = 0; i < list_size; i++) {
 		if(strcmp(param_list[0], cmd_list[i].name) == 0) {
 			cmd_list[i].handler(param_list);
+			cmd[0] = '\0';
 			return;
 		}
 	}
 
 	unknown_cmd_handler(param_list);
+	cmd[0] = '\0';
 }
