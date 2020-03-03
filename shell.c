@@ -241,7 +241,7 @@ static void shell_split_cmd_token(char *cmd, char param_list[PARAM_LIST_SIZE_MAX
 			param_list_index++;
 			j = 0;
 
-			/* exceed maximum parameter count  */
+			/* exceed maximum parameter count */
 			if(param_list_index == PARAM_LIST_SIZE_MAX) {
 				*param_cnt = param_list_index;
 				return;
