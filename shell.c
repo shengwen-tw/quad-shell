@@ -29,6 +29,9 @@ void shell_init_struct(struct shell_struct *shell, char *prompt_msg, char *ret_c
 	shell->prompt_msg = prompt_msg;
 	shell->prompt_len = strlen(shell->prompt_msg);
 
+	shell->char_cnt = 0;
+	shell->buf = ret_cmd;
+
 	shell->cursor_pos = 0;
 	memset(shell->buf, '\0', CMD_LEN_MAX);
 }
