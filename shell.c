@@ -39,10 +39,10 @@ static void shell_reset_struct(struct shell_struct *shell)
 	shell->char_cnt = 0;
 }
 
-static void shell_remove_char(struct shell_struct *shell)
+static void shell_remove_char(struct shell_struct *shell, int remove_pos)
 {
 	int i;
-	for(i = (shell->cursor_pos - 1); i < (shell->char_cnt); i++) {
+	for(i = (remove_pos - 1); i < (shell->char_cnt); i++) {
 		shell->buf[i] = shell->buf[i + 1];
 	}
 
@@ -158,10 +158,10 @@ void shell_cli(struct shell_struct *shell)
 			break;
 		case CTRL_Z:
 			break;
-		case VET_SEQ1:
+		case ESC_SEQ1:
 			seq[0] = shell_getc();
 			seq[1] = shell_getc();
-			if(seq[0] == VT_SEQ2) {
+			if(seq[0] == ESC_SEQ2) {
 				if(seq[1] == UP_ARROW) {
 				} else if(seq[1] == DOWN_ARROW) {
 				} else if(seq[1] == RIGHT_ARROW) {
@@ -182,12 +182,18 @@ void shell_cli(struct shell_struct *shell)
 						shell->cursor_pos = shell->char_cnt;
 						shell_refresh_line(shell);
 					}
+				} else if(seq[1] = DELETE && shell_getc() == ESC_SEQ4) {
+					if(shell->char_cnt != 0 && shell->cursor_pos != shell->char_cnt) {
+						shell_remove_char(shell, shell->cursor_pos + 1);
+						shell->cursor_pos++;
+						shell_refresh_line(shell);
+					}
 				}
 			}				
 			break;
 		case BACKSPACE:
 			if(shell->char_cnt != 0 && shell->cursor_pos != 0) {
-				shell_remove_char(shell);
+				shell_remove_char(shell, shell->cursor_pos);
 				shell_refresh_line(shell);
 			}
 			break;
