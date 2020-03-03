@@ -36,13 +36,15 @@ enum {
 	CTRL_X = 24,       /* ctrl + x */
 	CTRL_Y = 25,       /* ctrl + y */
 	CTRL_Z = 26,       /* ctrl + z */
-	ESCAPE_SEQ = 27,   /* start of escape sequence */
+	VET_SEQ1 = 27,     /* first byte of the vt escape sequence */
 	SPACE = 32,        /* space */
-	UP_ARROW = 65,     /* last character of up arrow */
-	DOWN_ARROW = 66,   /* last character of down arrow */
-	RIGHT_ARROW = 67,  /* last character of right arrow */
-	LEFT_ARROW = 68,   /* last character of left arrow */
-	ARROW_PREFIX = 91, /* any arrow = ESC_SEQ + '[' + 'A' ~ 'D' */
+	UP_ARROW = 65,     /* up arrow, third byte of the vt escape sequence */
+	DOWN_ARROW = 66,   /* down arrow, third byte of the vt escape sequence */
+	RIGHT_ARROW = 67,  /* right arrow, third byte of the vt escape sequence */
+	LEFT_ARROW = 68,   /* left arrow, third byte of the vt escape sequence */
+	END = 70,          /* end, third byte of the vt escape sequence */
+	HOME = 72,         /* home, third byte of the vt escape sequence */
+	VT_SEQ2 = 91,      /* second byte of the vt escape sequence */
 	BACKSPACE = 127,   /* backspace */
 } KEYS;
 

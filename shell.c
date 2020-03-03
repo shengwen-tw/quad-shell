@@ -30,8 +30,6 @@ void shell_init_struct(struct shell_struct *shell, char *prompt_msg, char *ret_c
 	shell->prompt_len = strlen(shell->prompt_msg);
 
 	shell->cursor_pos = 0;
-	shell->char_cnt = 0;
-	shell->buf = ret_cmd;
 	memset(shell->buf, '\0', CMD_LEN_MAX);
 }
 
@@ -107,6 +105,10 @@ void shell_cli(struct shell_struct *shell)
 		case CTRL_D:
 			break;
 		case CTRL_E:
+			if(shell->char_cnt > 0) {
+				shell->cursor_pos = shell->char_cnt;
+				shell_refresh_line(shell);
+			}
 			break;
 		case CTRL_F:
 			break;
@@ -156,10 +158,10 @@ void shell_cli(struct shell_struct *shell)
 			break;
 		case CTRL_Z:
 			break;
-		case ESCAPE_SEQ:
+		case VET_SEQ1:
 			seq[0] = shell_getc();
 			seq[1] = shell_getc();
-			if(seq[0] == ARROW_PREFIX) {
+			if(seq[0] == VT_SEQ2) {
 				if(seq[1] == UP_ARROW) {
 				} else if(seq[1] == DOWN_ARROW) {
 				} else if(seq[1] == RIGHT_ARROW) {
@@ -171,6 +173,14 @@ void shell_cli(struct shell_struct *shell)
 					if(shell->cursor_pos > 0) {
 						shell_puts("\033[1D");
 						shell->cursor_pos--;
+					}
+				} else if(seq[1] == HOME) {
+					shell->cursor_pos = 0;
+					shell_refresh_line(shell);
+				} else if(seq[1] == END) {
+					if(shell->char_cnt > 0) {
+						shell->cursor_pos = shell->char_cnt;
+						shell_refresh_line(shell);
 					}
 				}
 			}				
