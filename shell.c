@@ -226,6 +226,10 @@ void shell_cli(struct shell_struct *shell)
 		case CTRL_T:
 			break;
 		case CTRL_U:
+			shell->buf[0] = '\0';
+			shell->char_cnt = 0;
+			shell->cursor_pos = 0;
+			shell_refresh_line(shell);
 			break;
 		case CTRL_W:
 			break;
