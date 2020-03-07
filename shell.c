@@ -156,7 +156,6 @@ static void print_history(struct shell_struct *shell)
 		shell_puts("\n\r");
 		history_print = history_print->next;
 	}
-
 }
 
 void shell_cli(struct shell_struct *shell)
@@ -235,7 +234,6 @@ void shell_cli(struct shell_struct *shell)
 		case CTRL_Y:
 			break;
 		case CTRL_Z:
-			print_history(shell);
 			break;
 		case ESC_SEQ1:
 			seq[0] = shell_getc();
