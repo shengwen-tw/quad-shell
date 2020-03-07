@@ -16,7 +16,8 @@
 
 enum {
 	NULL_CH = 0,       /* null character */
-	CTRL_A = 1,        /* ctrl + a*/
+	CTRL_A = 1,        /* ctrl + a */
+	CTRL_B = 2,        /* ctrl + b */
 	CTRL_C = 3,        /* ctrl + c */
 	CTRL_D = 4,        /* ctrl + d */
 	CTRL_E = 5,        /* ctrl + e */

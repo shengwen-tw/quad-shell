@@ -115,6 +115,22 @@ static void shell_refresh_line(struct shell_struct *shell)
 	shell_puts(s);
 }
 
+static void shell_cursor_shift_one_left(struct shell_struct *shell)
+{
+	if(shell->cursor_pos > 0) {
+		shell_puts("\033[1D");
+		shell->cursor_pos--;
+	}
+}
+
+static void shell_cursor_shift_one_right(struct shell_struct *shell)
+{
+	if(shell->cursor_pos < shell->char_cnt) {
+		shell->cursor_pos++;
+		shell_puts("\033[1C");
+	}
+}
+
 static void shell_push_new_history(struct shell_struct *shell, char *cmd)
 {
 	/* the shell historys are stored in a circular linking list data
@@ -174,6 +190,9 @@ void shell_cli(struct shell_struct *shell)
 			shell->cursor_pos = 0;
 			shell_refresh_line(shell);
 			break;
+		case CTRL_B:
+			shell_cursor_shift_one_left(shell);
+			break;
 		case CTRL_C:
 			shell_ctrl_c_handler();
 			return;
@@ -187,6 +206,7 @@ void shell_cli(struct shell_struct *shell)
 			}
 			break;
 		case CTRL_F:
+			shell_cursor_shift_one_right(shell);
 			break;
 		case CTRL_G:
 			break;
@@ -288,15 +308,9 @@ void shell_cli(struct shell_struct *shell)
 					shell->cursor_pos = shell->char_cnt;
 					shell_refresh_line(shell);
 				} else if(seq[1] == RIGHT_ARROW) {
-					if(shell->cursor_pos < shell->char_cnt) {
-						shell->cursor_pos++;
-						shell_puts("\033[1C");
-					}
+					shell_cursor_shift_one_right(shell);
 				} else if(seq[1] == LEFT_ARROW) {
-					if(shell->cursor_pos > 0) {
-						shell_puts("\033[1D");
-						shell->cursor_pos--;
-					}
+					shell_cursor_shift_one_left(shell);
 				} else if(seq[1] == HOME) {
 					shell->cursor_pos = 0;
 					shell_refresh_line(shell);
