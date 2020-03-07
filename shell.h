@@ -56,6 +56,7 @@ enum {
 
 typedef struct shell_history_struct {
 	char cmd[CMD_LEN_MAX];
+	struct shell_history_struct *last;
 	struct shell_history_struct *next;
 } shell_history_t;
 
@@ -68,8 +69,9 @@ struct shell_struct {
 
 	shell_history_t history[HISTORY_MAX_SIZE];
 	shell_history_t *history_top;
+	shell_history_t *history_end;
 	shell_history_t *history_disp;
-	char preserve_typing[CMD_LEN_MAX]; //preserve user's typing while checking the history
+	char typing_preserve[CMD_LEN_MAX]; //preserve user's typing while checking the history
 	int history_num;
 	int history_disp_curr;
 	bool read_history;

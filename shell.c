@@ -58,8 +58,13 @@ void shell_init_struct(struct shell_struct *shell, char *prompt_msg, char *ret_c
 		shell->history[i].cmd[0] = '\0';
 		shell->history[i].next = &shell->history[i + 1];
 	}
+	for(int i = 1; i < HISTORY_MAX_SIZE; i++) {
+		shell->history[i].last = &shell->history[i - 1];
+	}
+	
 	shell->history[HISTORY_MAX_SIZE - 1].cmd[0] = '\0';
 	shell->history[HISTORY_MAX_SIZE - 1].next = shell->history_top;
+	shell->history[0].last = &shell->history[HISTORY_MAX_SIZE - 1];
 	shell->history_num = 0;
 	shell->read_history = false;
 }
@@ -241,7 +246,7 @@ void shell_cli(struct shell_struct *shell)
 						break;
 					}
 					if(shell->read_history == false) {
-						strcpy(shell->preserve_typing, shell->buf);
+						strcpy(shell->typing_preserve, shell->buf);
 						shell->history_disp = shell->history_top;
 						shell->history_disp_curr = 0;
 						shell->read_history = true;
@@ -253,7 +258,7 @@ void shell_cli(struct shell_struct *shell)
 						strcpy(shell->buf, shell->history_disp->cmd);
 						shell->history_disp_curr++;
 					} else {
-						strcpy(shell->buf, shell->preserve_typing);
+						strcpy(shell->buf, shell->typing_preserve);
 						shell->history_disp = shell->history_top;
 						shell->history_disp_curr = 0;
 						shell->read_history = false;
@@ -262,6 +267,24 @@ void shell_cli(struct shell_struct *shell)
 					shell->cursor_pos = shell->char_cnt;
 					shell_refresh_line(shell);
 				} else if(seq[1] == DOWN_ARROW) {
+					if(shell->read_history == false) {
+						break;
+					} else {
+						shell->history_disp = shell->history_disp->last;
+					}
+					/* restore user's typing if finished traveling through the whole list */
+					if(shell->history_disp_curr > 1) {
+						strcpy(shell->buf, shell->history_disp->cmd);
+						shell->history_disp_curr--;
+					} else {
+						strcpy(shell->buf, shell->typing_preserve);
+						shell->history_disp = shell->history_top;
+						shell->history_disp_curr = 0;
+						shell->read_history = false;
+					}
+					shell->char_cnt = strlen(shell->buf);
+					shell->cursor_pos = shell->char_cnt;
+					shell_refresh_line(shell);
 				} else if(seq[1] == RIGHT_ARROW) {
 					if(shell->cursor_pos < shell->char_cnt) {
 						shell->cursor_pos++;
