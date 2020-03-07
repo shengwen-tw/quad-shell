@@ -51,6 +51,13 @@ void shell_init_struct(struct shell_struct *shell, char *prompt_msg, char *ret_c
 
 	shell->cursor_pos = 0;
 	memset(shell->buf, '\0', CMD_LEN_MAX);
+
+	shell->histiry_top = &shell->history[0];
+	int i;
+	for(int i = 0; i < HISTORY_MAX_SIZE - 1; i++) {
+		shell->history[i].next = &shell->history[i + 1];
+		shell->history[i].cmd[0] = '\0';
+	}
 }
 
 static void shell_reset_struct(struct shell_struct *shell)

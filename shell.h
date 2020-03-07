@@ -7,6 +7,8 @@
 #define PARAM_LIST_SIZE_MAX 10
 #define PARAM_LEN_MAX 10
 
+#define HISTORY_MAX_SIZE 5
+
 #define SIZE_OF_SHELL_CMD_LIST(list) (sizeof(list) / sizeof(struct cmd_list_entry))
 #define DEF_SHELL_CMD(cmd_name) {.handler = shell_cmd_ ## cmd_name, .name = #cmd_name},
 
@@ -50,12 +52,20 @@ enum {
 	BACKSPACE = 127,   /* backspace */
 } KEYS;
 
+typedef struct shell_history_struct {
+	char cmd[CMD_LEN_MAX];
+	struct shell_history_struct *next;
+} shell_history_t;
+
 struct shell_struct {
 	int cursor_pos;
 	int char_cnt;
 	int prompt_len;
 	char *buf;
 	char *prompt_msg;
+
+	shell_history_t history[HISTORY_MAX_SIZE];
+	shell_history_t *histiry_top;
 };
 
 struct cmd_list_entry {
