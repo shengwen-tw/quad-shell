@@ -61,12 +61,14 @@ void shell_init_struct(struct shell_struct *shell, char *prompt_msg, char *ret_c
 	shell->history[HISTORY_MAX_SIZE - 1].cmd[0] = '\0';
 	shell->history[HISTORY_MAX_SIZE - 1].next = shell->history_top;
 	shell->history_num = 0;
+	shell->read_history = false;
 }
 
 static void shell_reset_struct(struct shell_struct *shell)
 {
 	shell->cursor_pos = 0;
 	shell->char_cnt = 0;
+	shell->read_history = false;
 }
 
 static void shell_remove_char(struct shell_struct *shell, int remove_pos)
@@ -108,7 +110,7 @@ static void shell_refresh_line(struct shell_struct *shell)
 	shell_puts(s);
 }
 
-static void shell_push_new_history(struct shell_struct *shell)
+static void shell_push_new_history(struct shell_struct *shell, char *cmd)
 {
 	/* the shell historys are stored in a circular linking list data
          * structure queue */
@@ -117,7 +119,7 @@ static void shell_push_new_history(struct shell_struct *shell)
 	shell_history_t *curr_history;
 	if(shell->history_num < HISTORY_MAX_SIZE) {
 		curr_history = &shell->history[HISTORY_MAX_SIZE - shell->history_num - 1];
-		strcpy(curr_history->cmd, shell->buf);
+		strcpy(curr_history->cmd, cmd);
 		shell->history_num++;
 		shell->history_top = curr_history;
 		return;
@@ -194,7 +196,7 @@ void shell_cli(struct shell_struct *shell)
 			if(shell->char_cnt > 0) {
 				shell_puts("\n\r");
 				shell_reset_struct(shell);
-				shell_push_new_history(shell);
+				shell_push_new_history(shell, shell->buf);
 				return;
 			} else {
 				shell_puts("\n\r");
@@ -235,6 +237,30 @@ void shell_cli(struct shell_struct *shell)
 			seq[1] = shell_getc();
 			if(seq[0] == ESC_SEQ2) {
 				if(seq[1] == UP_ARROW) {
+					if(shell->history_num == 0) {
+						break;
+					}
+					if(shell->read_history == false) {
+						strcpy(shell->preserve_typing, shell->buf);
+						shell->history_disp = shell->history_top;
+						shell->history_disp_curr = 0;
+						shell->read_history = true;
+					} else {
+						shell->history_disp = shell->history_disp->next;
+					}
+					/* restore user's typing if finished traveling through the whole list */
+					if(shell->history_disp_curr < shell->history_num) {
+						strcpy(shell->buf, shell->history_disp->cmd);
+						shell->history_disp_curr++;
+					} else {
+						strcpy(shell->buf, shell->preserve_typing);
+						shell->history_disp = shell->history_top;
+						shell->history_disp_curr = 0;
+						shell->read_history = false;
+					}
+					shell->char_cnt = strlen(shell->buf);
+					shell->cursor_pos = shell->char_cnt;
+					shell_refresh_line(shell);
 				} else if(seq[1] == DOWN_ARROW) {
 				} else if(seq[1] == RIGHT_ARROW) {
 					if(shell->cursor_pos < shell->char_cnt) {
@@ -272,6 +298,7 @@ void shell_cli(struct shell_struct *shell)
 		case SPACE:
 		default:
 			if(shell->char_cnt != (CMD_LEN_MAX - 1)) {
+				shell->read_history = false;
 				shell_insert_char(shell, c);
 				shell_refresh_line(shell);
 			}

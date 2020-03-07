@@ -1,6 +1,8 @@
 #ifndef __SHELL_H__
 #define __SHELL_H__
 
+#include <stdbool.h>
+
 #define CMD_LEN_MAX 50
 #define PROMPT_LEN_MAX 50
 
@@ -66,7 +68,11 @@ struct shell_struct {
 
 	shell_history_t history[HISTORY_MAX_SIZE];
 	shell_history_t *history_top;
+	shell_history_t *history_disp;
+	char preserve_typing[CMD_LEN_MAX]; //preserve user's typing while checking the history
 	int history_num;
+	int history_disp_curr;
+	bool read_history;
 };
 
 struct cmd_list_entry {
