@@ -43,15 +43,7 @@ int main(void)
 	int shell_cmd_cnt = SIZE_OF_SHELL_CMD_LIST(shell_cmd_list);
 
 	shell_cls();
-        printf("                       _       _          _  _ \n\r"
-               "                      | |     | |        | || |\n\r"
-               "  __ _ _   _  __ _  __| |  ___| |__   ___| || |\n\r"
-               " / _` | | | |/ _` |/ _` | / __| '_ \\ / _ \\ || |\n\r"
-               "| (_| | |_| | (_| | (_| | \\__ \\ | | |  __/ || |\n\r"
-               " \\__, |\\__,_|\\__,_|\\__,_| |___/_| |_|\\___|_||_|\n\r"
-               "    | |\n\r"
-               "    |_|\n\r\n\r");
-	printf("firmware build time: %s %s\n\rtype 'help' for help\n\r\n\r", __TIME__, __DATE__);
+	printf("shell build time: %s %s\n\rtype 'help' for help\n\r\n\r", __TIME__, __DATE__);
 
 	while(1) {
 		shell_cli(&shell);
