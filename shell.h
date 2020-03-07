@@ -65,7 +65,8 @@ struct shell_struct {
 	char *prompt_msg;
 
 	shell_history_t history[HISTORY_MAX_SIZE];
-	shell_history_t *histiry_top;
+	shell_history_t *history_top;
+	int history_num;
 };
 
 struct cmd_list_entry {
