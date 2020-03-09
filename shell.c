@@ -6,13 +6,13 @@
 #include "shell.h"
 
 /* port your own getc function here */
-static char shell_getc(void)
+char shell_getc(void)
 {
 	return getchar();
 }
 
 /* port your own puts function here */
-static void shell_puts(char *s)
+void shell_puts(char *s)
 {
 	int len = strlen(s);
 

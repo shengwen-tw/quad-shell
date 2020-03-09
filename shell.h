@@ -83,6 +83,8 @@ struct cmd_list_entry {
 	char name[PROMPT_LEN_MAX];
 };
 
+char shell_getc(void);
+void shell_puts(char *s);
 void shell_init_struct(struct shell_struct *_shell, char *prompt_msg, char *ret_cmd);
 void shell_cls(void);
 void shell_cli(struct shell_struct *_shell);
