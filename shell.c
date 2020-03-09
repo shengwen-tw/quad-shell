@@ -348,6 +348,7 @@ void shell_cli(struct shell_struct *shell)
 
 static void shell_split_cmd_token(char *cmd, char param_list[PARAM_LIST_SIZE_MAX][PARAM_LEN_MAX], int *param_cnt)
 {
+	bool no_param_after_space = false;
 	int param_list_index = 0;
 	int i = 0, j = 0;
 
@@ -360,6 +361,8 @@ static void shell_split_cmd_token(char *cmd, char param_list[PARAM_LIST_SIZE_MAX
 
 	for(; i < cmd_s_len; i++) {
 		if(cmd[i] == ' ') {
+			no_param_after_space = true;
+
 			param_list[param_list_index][j] = '\0';
 			param_list_index++;
 			j = 0;
@@ -375,10 +378,16 @@ static void shell_split_cmd_token(char *cmd, char param_list[PARAM_LIST_SIZE_MAX
 				i++;
 			}
 		} else {
+			no_param_after_space = false;
 			param_list[param_list_index][j] = cmd[i];
 			j++;
 		}
 	}
+
+	if(no_param_after_space == true) {
+		param_list_index--;
+	}
+
 	*param_cnt = param_list_index + 1;
 }
 
