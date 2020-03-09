@@ -54,11 +54,11 @@ void shell_init_struct(struct shell_struct *shell, char *prompt_msg, char *ret_c
 
 	shell->history_top = &shell->history[0];
 	int i;
-	for(int i = 0; i < (HISTORY_MAX_SIZE - 1); i++) {
+	for(i = 0; i < (HISTORY_MAX_SIZE - 1); i++) {
 		shell->history[i].cmd[0] = '\0';
 		shell->history[i].next = &shell->history[i + 1];
 	}
-	for(int i = 1; i < HISTORY_MAX_SIZE; i++) {
+	for(i = 1; i < HISTORY_MAX_SIZE; i++) {
 		shell->history[i].last = &shell->history[i - 1];
 	}
 	
@@ -159,7 +159,7 @@ static void shell_push_new_history(struct shell_struct *shell, char *cmd)
 	shell->history_top = history_end;
 }
 
-static void print_history(struct shell_struct *shell)
+void print_history(struct shell_struct *shell)
 {
 	shell_puts("\n\r");
 	shell_history_t *history_print = shell->history_top;
