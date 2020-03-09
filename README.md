@@ -18,7 +18,11 @@ A dynamic memory allocation free shell environment suitable for embedded devices
 
 **End, Ctrl+E:** Move cursor to rightmost
 
-**Left Arrow, Right Arrow**: Move cursor to left or right
+**Ctrl+U:** Delete whole line
+
+**Left Arrow, Ctrl+B**: Move cursor to left
+
+**Right Arrow, Ctrl+F**: Move cursor to right
 
 **Up Arrow, Down Arrow**: Display previous typings
 
