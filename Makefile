@@ -7,3 +7,6 @@ SRC=shell.c \
 
 all: $(SRC)
 	gcc -o $(EXECUTABLE) $(CFLAGS) $^
+
+clean:
+	rm $(EXECUTABLE)
