@@ -5,6 +5,8 @@
 #include <string.h>
 #include "shell.h"
 
+static void shell_reset_struct(struct shell_struct *shell);
+
 /* port your own getc function here */
 char shell_getc(void)
 {
@@ -23,11 +25,15 @@ void shell_puts(char *s)
 }
 
 /* define your own ctrl+c behavior here */
-static void shell_ctrl_c_handler(void)
+static void shell_ctrl_c_handler(struct shell_struct *shell)
 {
 	shell_puts("^C\n\r");
+#if 1	/* remove this if you want to port the shell to your own embedded device */
 	system("/bin/stty cooked echo");
 	exit(0);
+#endif
+	shell_puts(shell->prompt_msg);
+	shell_reset_struct(shell);
 }
 
 /* define your own unknown shell command behavior here */
@@ -194,8 +200,7 @@ void shell_cli(struct shell_struct *shell)
 			shell_cursor_shift_one_left(shell);
 			break;
 		case CTRL_C:
-			shell_ctrl_c_handler();
-			return;
+			shell_ctrl_c_handler(shell);
 			break;
 		case CTRL_D:
 			break;
