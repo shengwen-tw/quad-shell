@@ -67,7 +67,7 @@ void shell_init_struct(struct shell_struct *shell, char *prompt_msg, char *ret_c
 	for(i = 1; i < HISTORY_MAX_SIZE; i++) {
 		shell->history[i].last = &shell->history[i - 1];
 	}
-	
+
 	shell->history[HISTORY_MAX_SIZE - 1].cmd[0] = '\0';
 	shell->history[HISTORY_MAX_SIZE - 1].next = shell->history_top;
 	shell->history[0].last = &shell->history[HISTORY_MAX_SIZE - 1];
@@ -115,9 +115,9 @@ static void shell_refresh_line(struct shell_struct *shell)
 {
 	char s[PROMPT_LEN_MAX * 2];
 	sprintf(s, "\33[2K\r"   /* clear current line */
-                "%s%s\r"        /* show prompt */
-                "\033[%dC",     /* move cursor */
-                shell->prompt_msg, shell->buf, shell->prompt_len + shell->cursor_pos);
+	        "%s%s\r"        /* show prompt */
+	        "\033[%dC",     /* move cursor */
+	        shell->prompt_msg, shell->buf, shell->prompt_len + shell->cursor_pos);
 	shell_puts(s);
 }
 
@@ -140,7 +140,7 @@ static void shell_cursor_shift_one_right(struct shell_struct *shell)
 static void shell_push_new_history(struct shell_struct *shell, char *cmd)
 {
 	/* the shell historys are stored in a circular linking list data
-         * structure queue */
+	 * structure queue */
 
 	/* if history list is not full, fill in by inverse array order */
 	shell_history_t *curr_history;
@@ -316,14 +316,24 @@ void shell_cli(struct shell_struct *shell)
 					shell_cursor_shift_one_right(shell);
 				} else if(seq[1] == LEFT_ARROW) {
 					shell_cursor_shift_one_left(shell);
-				} else if(seq[1] == HOME) {
+				} else if(seq[1] == HOME_XTERM) {
 					shell->cursor_pos = 0;
 					shell_refresh_line(shell);
-				} else if(seq[1] == END) {
+				} else if(seq[1] == HOME_VT100) {
+					shell->cursor_pos = 0;
+					shell_refresh_line(shell);
+					shell_getc();
+				} else if(seq[1] == END_XTERM) {
 					if(shell->char_cnt > 0) {
 						shell->cursor_pos = shell->char_cnt;
 						shell_refresh_line(shell);
 					}
+				} else if(seq[1] == END_VT100) {
+					if(shell->char_cnt > 0) {
+						shell->cursor_pos = shell->char_cnt;
+						shell_refresh_line(shell);
+					}
+					shell_getc();
 				} else if(seq[1] == DELETE && shell_getc() == ESC_SEQ4) {
 					if(shell->char_cnt != 0 && shell->cursor_pos != shell->char_cnt) {
 						shell_remove_char(shell, shell->cursor_pos + 1);
@@ -331,7 +341,7 @@ void shell_cli(struct shell_struct *shell)
 						shell_refresh_line(shell);
 					}
 				}
-			}				
+			}
 			break;
 		case BACKSPACE:
 			if(shell->char_cnt != 0 && shell->cursor_pos != 0) {
