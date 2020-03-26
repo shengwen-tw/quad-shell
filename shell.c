@@ -124,8 +124,8 @@ static void shell_refresh_line(struct shell_struct *shell)
 static void shell_cursor_shift_one_left(struct shell_struct *shell)
 {
 	if(shell->cursor_pos > 0) {
-		shell_puts("\033[1D");
 		shell->cursor_pos--;
+		shell_refresh_line(shell);
 	}
 }
 
@@ -133,7 +133,7 @@ static void shell_cursor_shift_one_right(struct shell_struct *shell)
 {
 	if(shell->cursor_pos < shell->char_cnt) {
 		shell->cursor_pos++;
-		shell_puts("\033[1C");
+		shell_refresh_line(shell);
 	}
 }
 
